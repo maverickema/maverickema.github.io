@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>営業日カレンダー</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #17171f;
+    --surface2: #1e1e2a;
+    --border: #2a2a3a;
+    --accent: #e8c76a;
+    --accent2: #7b68ee;
+    --text: #e8e8f0;
+    --text-muted: #7070a0;
+    --holiday: #ff6b8a;
+    --saturday: #68b5ff;
+    --sunday: #ff6b8a;
+    --business: #5dd9a0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background decoration */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(123,104,238,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(232,199,106,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  header .label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.1;
+    letter-spacing: -1px;
+  }
+
+  header p {
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 300;
+  }
+
+  /* Year / Month nav */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.5s ease 0.15s both;
+  }
+
+  .nav-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+  .nav-year {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text);
+    min-width: 80px;
+    text-align: center;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.5s ease 0.2s both;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text-muted);
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+
+  /* Grid of months */
+  .months-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    animation: fadeUp 0.5s ease 0.25s both;
+  }
+
+  .month-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .month-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+  .month-card.current-month {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), 0 8px 30px rgba(232,199,106,0.15);
+  }
+
+  .month-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .month-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--text);
+  }
+
+  .month-stats {
+    display: flex; gap: 12px;
+  }
+
+  .stat {
+    text-align: center;
+  }
+  .stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--business);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  /* Calendar grid */
+  .cal-grid {
+    padding: 12px 16px 16px;
+  }
+
+  .cal-week-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .cal-week-header span {
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 4px 0;
+    font-weight: 500;
+  }
+  .cal-week-header span:first-child { color: var(--sunday); }
+  .cal-week-header span:last-child { color: var(--saturday); }
+  .cal-week-header span:not(:first-child):not(:last-child) { color: var(--text-muted); }
+
+  .cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 12px;
+    position: relative;
+    cursor: default;
+    transition: background 0.15s;
+  }
+
+  .day.empty { background: transparent; }
+
+  .day.weekday { color: var(--text); background: rgba(255,255,255,0.03); }
+  .day.weekday:hover { background: rgba(255,255,255,0.07); }
+
+  .day.saturday { color: var(--saturday); background: rgba(104,181,255,0.06); }
+  .day.sunday   { color: var(--sunday); background: rgba(255,107,138,0.06); }
+  .day.holiday  { color: var(--holiday); background: rgba(255,107,138,0.1); }
+  .day.holiday::after {
+    content: '祝';
+    font-size: 7px;
+    position: absolute;
+    bottom: 2px;
+    color: var(--holiday);
+    opacity: 0.8;
+  }
+
+  .day.today {
+    background: var(--accent) !important;
+    color: var(--bg) !important;
+    font-weight: 700;
+  }
+  .day.today::after { display: none; }
+
+  .day.off-day { opacity: 0.45; }
+
+  /* Summary bar */
+  .summary-bar {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 28px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+    animation: fadeUp 0.5s ease 0.3s both;
+  }
+
+  .sum-item { text-align: center; }
+  .sum-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .sum-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+
+  .divider { width: 1px; height: 40px; background: var(--border); }
+
+  /* Current month detail */
+  .current-detail {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.5s ease 0.35s both;
+  }
+
+  .current-detail h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin-bottom: 16px;
+    color: var(--accent);
+  }
+
+  .holiday-list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .holiday-chip {
+    background: rgba(255,107,138,0.12);
+    border: 1px solid rgba(255,107,138,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--holiday);
+  }
+  .no-holiday {
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:none; } }
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(20px); }  to { opacity:1; transform:none; } }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <span class="label">Business Calendar</span>
+    <h1>営業日カレンダー</h1>
+    <p>日本の祝日を考慮した月別営業日数を確認できます</p>
+  </header>
+
+  <div class="nav-bar">
+    <button class="nav-btn" id="prevYear">‹</button>
+    <div class="nav-year" id="yearLabel"></div>
+    <button class="nav-btn" id="nextYear">›</button>
+  </div>
+
+  <div class="summary-bar" id="summaryBar"></div>
+
+  <div class="current-detail" id="currentDetail"></div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--business)"></div>営業日</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--saturday)"></div>土曜日</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--holiday)"></div>日曜・祝日</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>今日</div>
+  </div>
+
+  <div class="months-grid" id="monthsGrid"></div>
+
+</div>
+
+<script>
+// ===== 日本の祝日データ =====
+const HOLIDAYS = {};
+
+function addHoliday(y, m, d, name) {
+  const key = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  HOLIDAYS[key] = name;
+}
+
+function buildHolidays(year) {
+  const y = year;
+
+  // 固定祝日
+  addHoliday(y,1,1,'元日');
+  addHoliday(y,2,11,'建国記念の日');
+  addHoliday(y,2,23,'天皇誕生日');
+  addHoliday(y,4,29,'昭和の日');
+  addHoliday(y,5,3,'憲法記念日');
+  addHoliday(y,5,4,'みどりの日');
+  addHoliday(y,5,5,'こどもの日');
+  addHoliday(y,8,11,'山の日');
+  addHoliday(y,11,3,'文化の日');
+  addHoliday(y,11,23,'勤労感謝の日');
+
+  // 春分の日（概算）
+  const shunbun = Math.floor(20.8431 + 0.242194*(y-1980) - Math.floor((y-1980)/4));
+  addHoliday(y, 3, shunbun, '春分の日');
+
+  // 秋分の日（概算）
+  const shubun = Math.floor(23.2488 + 0.242194*(y-1980) - Math.floor((y-1980)/4));
+  addHoliday(y, 9, shubun, '秋分の日');
+
+  // 海の日：7月第3月曜
+  addHoliday(y, 7, nthWeekday(y, 7, 1, 3), '海の日');
+  // 敬老の日：9月第3月曜
+  addHoliday(y, 9, nthWeekday(y, 9, 1, 3), '敬老の日');
+  // スポーツの日：10月第2月曜
+  addHoliday(y, 10, nthWeekday(y, 10, 1, 2), 'スポーツの日');
+
+  // 振替休日
+  applyFurikae(y);
+}
+
+function nthWeekday(y, m, dow, n) {
+  // dow: 0=Sun,1=Mon,...
+  let count = 0;
+  for (let d = 1; d <= 31; d++) {
+    const dt = new Date(y, m-1, d);
+    if (dt.getMonth() !== m-1) break;
+    if (dt.getDay() === dow) { count++; if (count === n) return d; }
+  }
+  return 1;
+}
+
+function applyFurikae(y) {
+  // 日曜が祝日なら翌月曜が振替
+  for (let m = 1; m <= 12; m++) {
+    const days = new Date(y, m, 0).getDate();
+    for (let d = 1; d <= days; d++) {
+      const dt = new Date(y, m-1, d);
+      const key = fmtKey(y, m, d);
+      if (HOLIDAYS[key] && dt.getDay() === 0) {
+        // find next non-holiday weekday
+        let nd = d + 1;
+        while (true) {
+          const ndt = new Date(y, m-1, nd);
+          const nk = fmtKey(y, ndt.getMonth()+1, ndt.getDate());
+          if (!HOLIDAYS[nk] && ndt.getDay() !== 0 && ndt.getDay() !== 6) {
+            HOLIDAYS[nk] = '振替休日';
+            break;
+          }
+          nd++;
+          if (nd > days + 5) break;
+        }
+      }
+    }
+  }
+}
+
+function fmtKey(y, m, d) {
+  return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+function isHoliday(y, m, d) { return !!HOLIDAYS[fmtKey(y, m, d)]; }
+function getHolidayName(y, m, d) { return HOLIDAYS[fmtKey(y, m, d)] || ''; }
+
+function isBusinessDay(y, m, d) {
+  const dt = new Date(y, m-1, d);
+  const dow = dt.getDay();
+  if (dow === 0 || dow === 6) return false;
+  if (isHoliday(y, m, d)) return false;
+  return true;
+}
+
+function getBusinessDays(y, m) {
+  const days = new Date(y, m, 0).getDate();
+  let count = 0;
+  for (let d = 1; d <= days; d++) if (isBusinessDay(y, m, d)) count++;
+  return count;
+}
+
+// ===== UI =====
+let currentYear = new Date().getFullYear();
+const today = new Date();
+
+function render() {
+  // Clear old holidays and rebuild
+  for (const k in HOLIDAYS) delete HOLIDAYS[k];
+  buildHolidays(currentYear);
+
+  document.getElementById('yearLabel').textContent = currentYear + '年';
+
+  renderSummary();
+  renderCurrentDetail();
+  renderMonths();
+}
+
+function renderSummary() {
+  let totalBiz = 0, totalHol = 0, totalDays = 0;
+  for (let m = 1; m <= 12; m++) {
+    const days = new Date(currentYear, m, 0).getDate();
+    totalDays += days;
+    totalBiz += getBusinessDays(currentYear, m);
+  }
+  totalHol = Object.keys(HOLIDAYS).filter(k => k.startsWith(currentYear+'')).length;
+
+  const bar = document.getElementById('summaryBar');
+  bar.innerHTML = `
+    <div class="sum-item"><div class="sum-value">${totalBiz}</div><div class="sum-label">年間営業日</div></div>
+    <div class="divider"></div>
+    <div class="sum-item"><div class="sum-value">${totalDays - totalBiz}</div><div class="sum-label">年間休日</div></div>
+    <div class="divider"></div>
+    <div class="sum-item"><div class="sum-value">${totalHol}</div><div class="sum-label">祝日数</div></div>
+    <div class="divider"></div>
+    <div class="sum-item"><div class="sum-value">${currentYear}</div><div class="sum-label">対象年</div></div>
+  `;
+}
+
+function renderCurrentDetail() {
+  const m = today.getMonth() + 1;
+  if (today.getFullYear() !== currentYear) {
+    document.getElementById('currentDetail').style.display = 'none';
+    return;
+  }
+  document.getElementById('currentDetail').style.display = '';
+
+  const biz = getBusinessDays(currentYear, m);
+  const days = new Date(currentYear, m, 0).getDate();
+
+  // Remaining business days
+  let remaining = 0;
+  for (let d = today.getDate(); d <= days; d++) {
+    if (isBusinessDay(currentYear, m, d)) remaining++;
+  }
+
+  // Holidays this month
+  const monthHols = [];
+  for (let d = 1; d <= days; d++) {
+    const name = getHolidayName(currentYear, m, d);
+    if (name) monthHols.push({ d, name });
+  }
+
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+  document.getElementById('currentDetail').innerHTML = `
+    <h2>📅 今月（${monthNames[m-1]}）の状況</h2>
+    <div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:16px;">
+      <div><span style="font-size:28px;font-weight:700;color:var(--business)">${biz}</span> <span style="color:var(--text-muted);font-size:13px">日 / 営業日</span></div>
+      <div><span style="font-size:28px;font-weight:700;color:var(--accent)">${remaining}</span> <span style="color:var(--text-muted);font-size:13px">日 / 残り営業日</span></div>
+      <div><span style="font-size:28px;font-weight:700;color:var(--holiday)">${days - biz}</span> <span style="color:var(--text-muted);font-size:13px">日 / 休日</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;letter-spacing:1px">今月の祝日</div>
+    <div class="holiday-list">
+      ${monthHols.length
+        ? monthHols.map(h => `<span class="holiday-chip">${m}/${h.d} ${h.name}</span>`).join('')
+        : '<span class="no-holiday">祝日はありません</span>'
+      }
+    </div>
+  `;
+}
+
+const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const weekHeaders = ['日','月','火','水','木','金','土'];
+
+function renderMonths() {
+  const grid = document.getElementById('monthsGrid');
+  grid.innerHTML = '';
+
+  for (let m = 1; m <= 12; m++) {
+    const biz = getBusinessDays(currentYear, m);
+    const days = new Date(currentYear, m, 0).getDate();
+    const rest = days - biz;
+    const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth()+1 === m;
+
+    const card = document.createElement('div');
+    card.className = 'month-card' + (isCurrentMonth ? ' current-month' : '');
+
+    card.innerHTML = `
+      <div class="month-header">
+        <div class="month-name">${monthNames[m-1]}</div>
+        <div class="month-stats">
+          <div class="stat"><div class="stat-value">${biz}</div><div class="stat-label">営業日</div></div>
+          <div class="stat"><div class="stat-value" style="color:var(--holiday)">${rest}</div><div class="stat-label">休日</div></div>
+        </div>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-week-header">${weekHeaders.map(w=>`<span>${w}</span>`).join('')}</div>
+        <div class="cal-days">${buildCalDays(currentYear, m)}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  }
+}
+
+function buildCalDays(y, m) {
+  const firstDow = new Date(y, m-1, 1).getDay();
+  const days = new Date(y, m, 0).getDate();
+  let html = '';
+
+  // Empty cells
+  for (let i = 0; i < firstDow; i++) html += '<div class="day empty"></div>';
+
+  for (let d = 1; d <= days; d++) {
+    const dt = new Date(y, m-1, d);
+    const dow = dt.getDay();
+    const isToday = dt.toDateString() === today.toDateString();
+    const holiday = isHoliday(y, m, d);
+
+    let cls = 'day';
+    if (isToday) cls += ' today';
+    else if (holiday) cls += ' holiday off-day';
+    else if (dow === 0) cls += ' sunday off-day';
+    else if (dow === 6) cls += ' saturday off-day';
+    else cls += ' weekday';
+
+    const title = holiday ? getHolidayName(y, m, d) : '';
+    html += `<div class="${cls}" title="${title}">${d}</div>`;
+  }
+  return html;
+}
+
+// Nav buttons
+document.getElementById('prevYear').addEventListener('click', () => { currentYear--; render(); });
+document.getElementById('nextYear').addEventListener('click', () => { currentYear++; render(); });
+
+render();
+</script>
+</body>
+</html>
