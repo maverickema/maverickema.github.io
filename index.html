@@ -1,339 +1,545 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5483937462374487"
-     crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5483937462374487"
+ crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>営業日カレンダー</title>
+<title>営業日カレンダー｜日本の祝日を考慮した月別営業日数を無料で確認</title>
+<meta name="description" content="日本の祝日・振替休日を自動計算し、月別・年間の営業日数を一覧表示する無料ツールです。2024年・2025年・2026年対応。経理・総務・ビジネス担当者に最適。">
+<link rel="canonical" href="https://maverickema.github.io/">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0f0f13;
-    --surface: #17171f;
-    --surface2: #1e1e2a;
-    --border: #2a2a3a;
-    --accent: #e8c76a;
-    --accent2: #7b68ee;
-    --text: #e8e8f0;
-    --text-muted: #7070a0;
-    --holiday: #ff6b8a;
-    --saturday: #68b5ff;
-    --sunday: #ff6b8a;
-    --business: #5dd9a0;
-  }
+:root {
+  --bg: #0f0f13;
+  --surface: #17171f;
+  --surface2: #1e1e2a;
+  --border: #2a2a3a;
+  --accent: #e8c76a;
+  --accent2: #7b68ee;
+  --text: #e8e8f0;
+  --text-muted: #7070a0;
+  --holiday: #ff6b8a;
+  --saturday: #68b5ff;
+  --sunday: #ff6b8a;
+  --business: #5dd9a0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(123,104,238,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(232,199,106,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ===== NAV ===== */
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 48px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.site-nav .logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--accent);
+  text-decoration: none;
+}
+.site-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.site-nav ul a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+.site-nav ul a:hover, .site-nav ul a.active { color: var(--accent); }
 
-  body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeDown 0.6s ease both;
+}
+header .label {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+  display: block;
+}
+header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(32px, 6vw, 56px);
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+header p {
+  margin-top: 12px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 300;
+}
 
-  /* Background decoration */
-  body::before {
-    content: '';
-    position: fixed;
-    top: -200px; left: -200px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(123,104,238,0.08) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  body::after {
-    content: '';
-    position: fixed;
-    bottom: -200px; right: -200px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(232,199,106,0.06) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
+/* ===== NAV BAR ===== */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 40px;
+  animation: fadeUp 0.5s ease 0.15s both;
+}
+.nav-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.nav-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.nav-year {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  color: var(--text);
+  min-width: 80px;
+  text-align: center;
+}
 
-  .wrapper {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 40px 20px 80px;
-  }
+/* ===== LEGEND ===== */
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.5s ease 0.2s both;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-muted);
+}
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
-  header {
-    text-align: center;
-    margin-bottom: 48px;
-    animation: fadeDown 0.6s ease both;
-  }
+/* ===== GRID ===== */
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  animation: fadeUp 0.5s ease 0.25s both;
+}
+.month-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.month-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+.month-card.current-month {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 8px 30px rgba(232,199,106,0.15);
+}
+.month-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.month-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--text);
+}
+.month-stats { display: flex; gap: 12px; }
+.stat { text-align: center; }
+.stat-value { font-size: 18px; font-weight: 700; color: var(--business); line-height: 1; }
+.stat-label { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; margin-top: 2px; }
+.cal-grid { padding: 12px 16px 16px; }
+.cal-week-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 6px;
+}
+.cal-week-header span {
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 4px 0;
+  font-weight: 500;
+}
+.cal-week-header span:first-child { color: var(--sunday); }
+.cal-week-header span:last-child { color: var(--saturday); }
+.cal-week-header span:not(:first-child):not(:last-child) { color: var(--text-muted); }
+.cal-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 12px;
+  position: relative;
+  cursor: default;
+  transition: background 0.15s;
+}
+.day.empty { background: transparent; }
+.day.weekday { color: var(--text); background: rgba(255,255,255,0.03); }
+.day.weekday:hover { background: rgba(255,255,255,0.07); }
+.day.saturday { color: var(--saturday); background: rgba(104,181,255,0.06); }
+.day.sunday { color: var(--sunday); background: rgba(255,107,138,0.06); }
+.day.holiday { color: var(--holiday); background: rgba(255,107,138,0.1); }
+.day.holiday::after {
+  content: '祝';
+  font-size: 7px;
+  position: absolute;
+  bottom: 2px;
+  color: var(--holiday);
+  opacity: 0.8;
+}
+.day.today {
+  background: var(--accent) !important;
+  color: var(--bg) !important;
+  font-weight: 700;
+}
+.day.today::after { display: none; }
+.day.off-day { opacity: 0.45; }
 
-  header .label {
-    font-size: 11px;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 12px;
-    display: block;
-  }
+/* ===== SUMMARY BAR ===== */
+.summary-bar {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 28px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+  animation: fadeUp 0.5s ease 0.3s both;
+}
+.sum-item { text-align: center; }
+.sum-value {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--accent);
+}
+.sum-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; letter-spacing: 1px; }
+.divider { width: 1px; height: 40px; background: var(--border); }
 
-  header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(32px, 6vw, 56px);
-    font-weight: 400;
-    color: var(--text);
-    line-height: 1.1;
-    letter-spacing: -1px;
-  }
+/* ===== CURRENT DETAIL ===== */
+.current-detail {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 32px;
+  animation: fadeUp 0.5s ease 0.35s both;
+}
+.current-detail h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  margin-bottom: 16px;
+  color: var(--accent);
+}
+.holiday-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.holiday-chip {
+  background: rgba(255,107,138,0.12);
+  border: 1px solid rgba(255,107,138,0.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--holiday);
+}
+.no-holiday { color: var(--text-muted); font-size: 13px; }
 
-  header p {
-    margin-top: 12px;
-    color: var(--text-muted);
-    font-size: 14px;
-    font-weight: 300;
-  }
+/* ===== CONTENT SECTIONS ===== */
+.content-section {
+  margin-top: 72px;
+  animation: fadeUp 0.5s ease 0.4s both;
+}
+.section-label {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+  display: block;
+}
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 32px;
+  line-height: 1.2;
+}
+.section-divider {
+  width: 48px;
+  height: 2px;
+  background: var(--accent);
+  margin-bottom: 32px;
+  border-radius: 2px;
+}
 
-  /* Year / Month nav */
-  .nav-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 40px;
-    animation: fadeUp 0.5s ease 0.15s both;
-  }
+/* About section */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 680px) { .about-grid { grid-template-columns: 1fr; } }
+.about-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+}
+.about-card h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.about-card p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
 
-  .nav-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-  }
-  .nav-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+/* Use cases */
+.usecase-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.usecase-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.usecase-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+.usecase-item h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.usecase-item p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
 
-  .nav-year {
-    font-family: 'DM Serif Display', serif;
-    font-size: 28px;
-    color: var(--text);
-    min-width: 80px;
-    text-align: center;
-  }
+/* How to use */
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.step-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.step-number {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  color: var(--accent);
+  opacity: 0.4;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 40px;
+}
+.step-item h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.step-item p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
 
-  /* Legend */
-  .legend {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    margin-bottom: 36px;
-    flex-wrap: wrap;
-    animation: fadeUp 0.5s ease 0.2s both;
-  }
-  .legend-item {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 12px; color: var(--text-muted);
-  }
-  .legend-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-  }
+/* FAQ */
+.faq-list { display: flex; flex-direction: column; gap: 12px; }
+.faq-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.faq-question {
+  padding: 18px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+  transition: background 0.2s;
+}
+.faq-question:hover { background: var(--surface2); }
+.faq-question::after {
+  content: '+';
+  font-size: 20px;
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.faq-item.open .faq-question::after { transform: rotate(45deg); }
+.faq-answer {
+  display: none;
+  padding: 0 24px 18px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+.faq-item.open .faq-answer { display: block; }
 
-  /* Grid of months */
-  .months-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    animation: fadeUp 0.5s ease 0.25s both;
-  }
+/* Articles */
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+.article-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  text-decoration: none;
+  display: block;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.article-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  border-color: var(--accent);
+}
+.article-tag {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+  display: block;
+}
+.article-card h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+.article-card p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
 
-  .month-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .month-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-  }
-  .month-card.current-month {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent), 0 8px 30px rgba(232,199,106,0.15);
-  }
+/* Footer */
+footer {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+footer p { font-size: 12px; color: var(--text-muted); }
+footer nav { display: flex; gap: 20px; }
+footer nav a { font-size: 12px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+footer nav a:hover { color: var(--accent); }
 
-  .month-header {
-    padding: 16px 20px 12px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .month-name {
-    font-family: 'DM Serif Display', serif;
-    font-size: 20px;
-    color: var(--text);
-  }
-
-  .month-stats {
-    display: flex; gap: 12px;
-  }
-
-  .stat {
-    text-align: center;
-  }
-  .stat-value {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--business);
-    line-height: 1;
-  }
-  .stat-label {
-    font-size: 9px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-    margin-top: 2px;
-  }
-
-  /* Calendar grid */
-  .cal-grid {
-    padding: 12px 16px 16px;
-  }
-
-  .cal-week-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    text-align: center;
-    margin-bottom: 6px;
-  }
-  .cal-week-header span {
-    font-size: 10px;
-    letter-spacing: 1px;
-    padding: 4px 0;
-    font-weight: 500;
-  }
-  .cal-week-header span:first-child { color: var(--sunday); }
-  .cal-week-header span:last-child { color: var(--saturday); }
-  .cal-week-header span:not(:first-child):not(:last-child) { color: var(--text-muted); }
-
-  .cal-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
-  }
-
-  .day {
-    aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    font-size: 12px;
-    position: relative;
-    cursor: default;
-    transition: background 0.15s;
-  }
-
-  .day.empty { background: transparent; }
-
-  .day.weekday { color: var(--text); background: rgba(255,255,255,0.03); }
-  .day.weekday:hover { background: rgba(255,255,255,0.07); }
-
-  .day.saturday { color: var(--saturday); background: rgba(104,181,255,0.06); }
-  .day.sunday   { color: var(--sunday); background: rgba(255,107,138,0.06); }
-  .day.holiday  { color: var(--holiday); background: rgba(255,107,138,0.1); }
-  .day.holiday::after {
-    content: '祝';
-    font-size: 7px;
-    position: absolute;
-    bottom: 2px;
-    color: var(--holiday);
-    opacity: 0.8;
-  }
-
-  .day.today {
-    background: var(--accent) !important;
-    color: var(--bg) !important;
-    font-weight: 700;
-  }
-  .day.today::after { display: none; }
-
-  .day.off-day { opacity: 0.45; }
-
-  /* Summary bar */
-  .summary-bar {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px 28px;
-    margin-bottom: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 20px;
-    animation: fadeUp 0.5s ease 0.3s both;
-  }
-
-  .sum-item { text-align: center; }
-  .sum-value {
-    font-family: 'DM Serif Display', serif;
-    font-size: 36px;
-    line-height: 1;
-    color: var(--accent);
-  }
-  .sum-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
-    letter-spacing: 1px;
-  }
-
-  .divider { width: 1px; height: 40px; background: var(--border); }
-
-  /* Current month detail */
-  .current-detail {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px 28px;
-    margin-bottom: 32px;
-    animation: fadeUp 0.5s ease 0.35s both;
-  }
-
-  .current-detail h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 22px;
-    margin-bottom: 16px;
-    color: var(--accent);
-  }
-
-  .holiday-list {
-    display: flex; flex-wrap: wrap; gap: 8px;
-  }
-  .holiday-chip {
-    background: rgba(255,107,138,0.12);
-    border: 1px solid rgba(255,107,138,0.25);
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 12px;
-    color: var(--holiday);
-  }
-  .no-holiday {
-    color: var(--text-muted);
-    font-size: 13px;
-  }
-
-  @keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:none; } }
-  @keyframes fadeUp   { from { opacity:0; transform:translateY(20px); }  to { opacity:1; transform:none; } }
+@keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:none; } }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
 </style>
 </head>
 <body>
 <div class="wrapper">
+
+  <!-- サイトナビ -->
+  <nav class="site-nav">
+    <a href="/" class="logo">営業日カレンダー</a>
+    <ul>
+      <li><a href="/" class="active">カレンダー</a></li>
+
+    </ul>
+  </nav>
 
   <header>
     <span class="label">Business Calendar</span>
@@ -348,7 +554,6 @@
   </div>
 
   <div class="summary-bar" id="summaryBar"></div>
-
   <div class="current-detail" id="currentDetail"></div>
 
   <div class="legend">
@@ -360,21 +565,185 @@
 
   <div class="months-grid" id="monthsGrid"></div>
 
+  <!-- ===== 方法1: サイト説明・活用例 ===== -->
+  <section class="content-section">
+    <span class="section-label">About this tool</span>
+    <h2 class="section-title">営業日カレンダーとは</h2>
+    <div class="section-divider"></div>
+    <div class="about-grid">
+      <div class="about-card">
+        <h3>🗓 このサービスについて</h3>
+        <p>営業日カレンダーは、日本の法定祝日・振替休日を自動的に考慮して、月ごとの正確な営業日数を一覧表示する無料のWebツールです。カレンダー画面から年単位で営業日を確認でき、今月の残り営業日数もリアルタイムで把握できます。</p>
+      </div>
+      <div class="about-card">
+        <h3>📋 対応している祝日</h3>
+        <p>元日・成人の日・建国記念の日・天皇誕生日・春分の日・昭和の日・憲法記念日・みどりの日・こどもの日・海の日・山の日・敬老の日・秋分の日・スポーツの日・文化の日・勤労感謝の日に加え、振替休日も自動計算されます。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 活用例 -->
+  <section class="content-section">
+    <span class="section-label">Use Cases</span>
+    <h2 class="section-title">こんな場面で活躍します</h2>
+    <div class="section-divider"></div>
+    <div class="usecase-list">
+      <div class="usecase-item">
+        <div class="usecase-icon">📊</div>
+        <div>
+          <h4>経理・給与計算</h4>
+          <p>月末締めの給与計算や、請求書の支払い期日の確認に。営業日ベースの締め日管理がスムーズになります。</p>
+        </div>
+      </div>
+      <div class="usecase-item">
+        <div class="usecase-icon">📦</div>
+        <div>
+          <h4>納期・配送スケジュール管理</h4>
+          <p>「〇営業日以内に発送」など、実際の業務日を基準とした納期計算に役立ちます。祝日をうっかり営業日に数えるミスを防ぎます。</p>
+        </div>
+      </div>
+      <div class="usecase-item">
+        <div class="usecase-icon">📅</div>
+        <div>
+          <h4>プロジェクト工程表の作成</h4>
+          <p>プロジェクトのマイルストーン設定や工程表作成時に、実際に稼働できる日数を正確に把握できます。</p>
+        </div>
+      </div>
+      <div class="usecase-item">
+        <div class="usecase-icon">🏦</div>
+        <div>
+          <h4>銀行・金融手続きのタイミング確認</h4>
+          <p>振込・送金の着金日確認や、金融機関の営業日ベースの期日管理に。「翌営業日」がいつになるか一目でわかります。</p>
+        </div>
+      </div>
+      <div class="usecase-item">
+        <div class="usecase-icon">🎯</div>
+        <div>
+          <h4>月間・年間の業務計画策定</h4>
+          <p>年度初めの業務計画や月次目標の設定時に、実稼働日数を正確に把握して現実的な計画を立てられます。</p>
+        </div>
+      </div>
+      <div class="usecase-item">
+        <div class="usecase-icon">✈️</div>
+        <div>
+          <h4>有給・休暇取得の計画</h4>
+          <p>祝日を含む連休の前後に有給を取得してロング休暇を作る際など、効率的な休暇計画に活用できます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 方法1: 使い方 ===== -->
+  <section class="content-section">
+    <span class="section-label">How to use</span>
+    <h2 class="section-title">使い方ガイド</h2>
+    <div class="section-divider"></div>
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-number">01</div>
+        <div>
+          <h4>年を選択する</h4>
+          <p>画面上部の「‹」「›」ボタンで確認したい年に切り替えます。現在年・前年・来年など、複数年にわたる計画にも対応しています。</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">02</div>
+        <div>
+          <h4>年間サマリーを確認する</h4>
+          <p>ページ上部のサマリーバーで、選択した年の「年間営業日数」「年間休日数」「祝日数」を一目で確認できます。</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">03</div>
+        <div>
+          <h4>月別カレンダーで詳細を確認する</h4>
+          <p>下部の月別カレンダーでは、各月の営業日数・休日数を表示しています。祝日は「祝」マークで示され、今日の日付はゴールドでハイライトされます。</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">04</div>
+        <div>
+          <h4>今月の残り営業日を確認する</h4>
+          <p>今年を表示している場合、今月の状況パネルに「残り営業日数」がリアルタイムで表示されます。月末に向けた業務調整にご活用ください。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 方法1: FAQ ===== -->
+  <section class="content-section">
+    <span class="section-label">FAQ</span>
+    <h2 class="section-title">よくある質問</h2>
+    <div class="section-divider"></div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-question">祝日のデータはどのように計算されていますか？</div>
+        <div class="faq-answer">日本の祝日法に基づき、固定祝日（元日・憲法記念日など）は日付で管理し、移動祝日（海の日・敬老の日など）は「第○月曜日」のルールで自動計算しています。また、振替休日についても祝日が日曜と重なった場合に翌月曜へ自動的にスライドされる処理が組み込まれています。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">春分の日・秋分の日はどうやって算出しているのですか？</div>
+        <div class="faq-answer">春分の日・秋分の日は国立天文台が毎年「暦要項」で官報告示するもので、年によって日付が変わります。本ツールでは天文学的な概算式を用いて計算しています。数年先まではほぼ正確ですが、確定値は官報をご確認ください。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">土曜日は営業日に含まれますか？</div>
+        <div class="faq-answer">本ツールでは「月〜金曜日のうち、祝日・振替休日でない日」を営業日としてカウントしています。土曜日が営業日となる会社の場合は、表示された数値に各月の土曜日数を加算してご利用ください。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">何年先まで対応していますか？</div>
+        <div class="faq-answer">祝日計算ロジックは将来の年にも対応しています。ただし、政府による祝日の追加・変更（例：新天皇即位・国民の祝日の新設）は反映されない場合があります。重要な業務利用の際は内閣府の公式祝日情報と照合することをお勧めします。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">スマートフォンでも使えますか？</div>
+        <div class="faq-answer">はい。レスポンシブデザインに対応しており、スマートフォン・タブレット・PCのいずれでも快適にご利用いただけます。アプリのインストールは不要で、ブラウザから直接アクセスするだけで使えます。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">利用料金はかかりますか？</div>
+        <div class="faq-answer">完全無料でご利用いただけます。アカウント登録も不要です。広告が表示されますが、サービス本体の機能はすべて無料で提供しています。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 関連記事リンク -->
+  <section class="content-section">
+    <span class="section-label">Articles</span>
+    <h2 class="section-title">関連コラム</h2>
+    <div class="section-divider"></div>
+    <div class="articles-grid">
+      <a href="/articles/business-days-guide.html" class="article-card">
+        <span class="article-tag">使い方ガイド</span>
+        <h3>営業日の数え方と計算方法をわかりやすく解説</h3>
+        <p>「〇営業日後」「月末営業日」など、ビジネスでよく使われる営業日の数え方をわかりやすくまとめました。</p>
+      </a>
+      <a href="/articles/business-days-guide.html#holiday-list" class="article-card">
+        <span class="article-tag">祝日情報</span>
+        <h3>2026年の祝日・連休カレンダー完全版</h3>
+        <p>2026年の祝日一覧と、ゴールデンウィーク・シルバーウィークなどの連休まとめ。営業日数の早見表付き。</p>
+      </a>
+      <a href="/articles/business-days-guide.html#tips" class="article-card">
+        <span class="article-tag">業務効率化</span>
+        <h3>月末・月初の営業日を素早く確認するコツ</h3>
+        <p>経理担当者や総務担当者向けに、毎月の締め作業をスムーズに進めるための営業日管理のポイントをまとめました。</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- フッター -->
+  <footer>
+    <p>© 2026 営業日カレンダー</p>
+    <nav></nav>
+  </footer>
+
 </div>
 
 <script>
 // ===== 日本の祝日データ =====
 const HOLIDAYS = {};
-
 function addHoliday(y, m, d, name) {
   const key = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
   HOLIDAYS[key] = name;
 }
-
 function buildHolidays(year) {
   const y = year;
-
-  // 固定祝日
   addHoliday(y,1,1,'元日');
   addHoliday(y,2,11,'建国記念の日');
   addHoliday(y,2,23,'天皇誕生日');
@@ -385,28 +754,17 @@ function buildHolidays(year) {
   addHoliday(y,8,11,'山の日');
   addHoliday(y,11,3,'文化の日');
   addHoliday(y,11,23,'勤労感謝の日');
-
-  // 春分の日（概算）
   const shunbun = Math.floor(20.8431 + 0.242194*(y-1980) - Math.floor((y-1980)/4));
   addHoliday(y, 3, shunbun, '春分の日');
-
-  // 秋分の日（概算）
   const shubun = Math.floor(23.2488 + 0.242194*(y-1980) - Math.floor((y-1980)/4));
   addHoliday(y, 9, shubun, '秋分の日');
-
-  // 海の日：7月第3月曜
+  addHoliday(y, 1, nthWeekday(y, 1, 1, 2), '成人の日');
   addHoliday(y, 7, nthWeekday(y, 7, 1, 3), '海の日');
-  // 敬老の日：9月第3月曜
   addHoliday(y, 9, nthWeekday(y, 9, 1, 3), '敬老の日');
-  // スポーツの日：10月第2月曜
   addHoliday(y, 10, nthWeekday(y, 10, 1, 2), 'スポーツの日');
-
-  // 振替休日
   applyFurikae(y);
 }
-
 function nthWeekday(y, m, dow, n) {
-  // dow: 0=Sun,1=Mon,...
   let count = 0;
   for (let d = 1; d <= 31; d++) {
     const dt = new Date(y, m-1, d);
@@ -415,23 +773,19 @@ function nthWeekday(y, m, dow, n) {
   }
   return 1;
 }
-
 function applyFurikae(y) {
-  // 日曜が祝日なら翌月曜が振替
   for (let m = 1; m <= 12; m++) {
     const days = new Date(y, m, 0).getDate();
     for (let d = 1; d <= days; d++) {
       const dt = new Date(y, m-1, d);
       const key = fmtKey(y, m, d);
       if (HOLIDAYS[key] && dt.getDay() === 0) {
-        // find next non-holiday weekday
         let nd = d + 1;
         while (true) {
           const ndt = new Date(y, m-1, nd);
           const nk = fmtKey(y, ndt.getMonth()+1, ndt.getDate());
           if (!HOLIDAYS[nk] && ndt.getDay() !== 0 && ndt.getDay() !== 6) {
-            HOLIDAYS[nk] = '振替休日';
-            break;
+            HOLIDAYS[nk] = '振替休日'; break;
           }
           nd++;
           if (nd > days + 5) break;
@@ -440,14 +794,11 @@ function applyFurikae(y) {
     }
   }
 }
-
 function fmtKey(y, m, d) {
   return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 }
-
 function isHoliday(y, m, d) { return !!HOLIDAYS[fmtKey(y, m, d)]; }
 function getHolidayName(y, m, d) { return HOLIDAYS[fmtKey(y, m, d)] || ''; }
-
 function isBusinessDay(y, m, d) {
   const dt = new Date(y, m-1, d);
   const dow = dt.getDay();
@@ -455,7 +806,6 @@ function isBusinessDay(y, m, d) {
   if (isHoliday(y, m, d)) return false;
   return true;
 }
-
 function getBusinessDays(y, m) {
   const days = new Date(y, m, 0).getDate();
   let count = 0;
@@ -463,31 +813,26 @@ function getBusinessDays(y, m) {
   return count;
 }
 
-// ===== UI =====
 let currentYear = new Date().getFullYear();
 const today = new Date();
 
 function render() {
-  // Clear old holidays and rebuild
   for (const k in HOLIDAYS) delete HOLIDAYS[k];
   buildHolidays(currentYear);
-
   document.getElementById('yearLabel').textContent = currentYear + '年';
-
   renderSummary();
   renderCurrentDetail();
   renderMonths();
 }
 
 function renderSummary() {
-  let totalBiz = 0, totalHol = 0, totalDays = 0;
+  let totalBiz = 0, totalDays = 0;
   for (let m = 1; m <= 12; m++) {
     const days = new Date(currentYear, m, 0).getDate();
     totalDays += days;
     totalBiz += getBusinessDays(currentYear, m);
   }
-  totalHol = Object.keys(HOLIDAYS).filter(k => k.startsWith(currentYear+'')).length;
-
+  const totalHol = Object.keys(HOLIDAYS).filter(k => k.startsWith(currentYear+'')).length;
   const bar = document.getElementById('summaryBar');
   bar.innerHTML = `
     <div class="sum-item"><div class="sum-value">${totalBiz}</div><div class="sum-label">年間営業日</div></div>
@@ -507,25 +852,18 @@ function renderCurrentDetail() {
     return;
   }
   document.getElementById('currentDetail').style.display = '';
-
   const biz = getBusinessDays(currentYear, m);
   const days = new Date(currentYear, m, 0).getDate();
-
-  // Remaining business days
   let remaining = 0;
   for (let d = today.getDate(); d <= days; d++) {
     if (isBusinessDay(currentYear, m, d)) remaining++;
   }
-
-  // Holidays this month
   const monthHols = [];
   for (let d = 1; d <= days; d++) {
     const name = getHolidayName(currentYear, m, d);
     if (name) monthHols.push({ d, name });
   }
-
   const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-
   document.getElementById('currentDetail').innerHTML = `
     <h2>📅 今月（${monthNames[m-1]}）の状況</h2>
     <div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:16px;">
@@ -549,16 +887,13 @@ const weekHeaders = ['日','月','火','水','木','金','土'];
 function renderMonths() {
   const grid = document.getElementById('monthsGrid');
   grid.innerHTML = '';
-
   for (let m = 1; m <= 12; m++) {
     const biz = getBusinessDays(currentYear, m);
     const days = new Date(currentYear, m, 0).getDate();
     const rest = days - biz;
     const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth()+1 === m;
-
     const card = document.createElement('div');
     card.className = 'month-card' + (isCurrentMonth ? ' current-month' : '');
-
     card.innerHTML = `
       <div class="month-header">
         <div class="month-name">${monthNames[m-1]}</div>
@@ -580,32 +915,31 @@ function buildCalDays(y, m) {
   const firstDow = new Date(y, m-1, 1).getDay();
   const days = new Date(y, m, 0).getDate();
   let html = '';
-
-  // Empty cells
   for (let i = 0; i < firstDow; i++) html += '<div class="day empty"></div>';
-
   for (let d = 1; d <= days; d++) {
     const dt = new Date(y, m-1, d);
     const dow = dt.getDay();
     const isToday = dt.toDateString() === today.toDateString();
-    const holiday = isHoliday(y, m, d);
-
+    const hol = isHoliday(y, m, d);
     let cls = 'day';
     if (isToday) cls += ' today';
-    else if (holiday) cls += ' holiday off-day';
-    else if (dow === 0) cls += ' sunday off-day';
-    else if (dow === 6) cls += ' saturday off-day';
+    else if (hol) cls += ' holiday';
+    else if (dow === 6) cls += ' saturday';
+    else if (dow === 0) cls += ' sunday';
     else cls += ' weekday';
-
-    const title = holiday ? getHolidayName(y, m, d) : '';
-    html += `<div class="${cls}" title="${title}">${d}</div>`;
+    html += `<div class="${cls}">${d}</div>`;
   }
   return html;
 }
 
-// Nav buttons
 document.getElementById('prevYear').addEventListener('click', () => { currentYear--; render(); });
 document.getElementById('nextYear').addEventListener('click', () => { currentYear++; render(); });
+
+// FAQ toggle
+document.addEventListener('click', e => {
+  const q = e.target.closest('.faq-question');
+  if (q) q.closest('.faq-item').classList.toggle('open');
+});
 
 render();
 </script>
